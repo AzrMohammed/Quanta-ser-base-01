@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+<head>
+  <meta charset="utf-8">
+  <title> static tests</title>
+  <link rel="stylesheet" href="{% static "css/base_style.css" %} ">
+</head>
+<body>
+<!-- <script src= src="{% static "js/delivery_agents.js" %}" > </script> -->
+<h1>{{test_var}}</h1>
+<p>This is another paragraph.</p>
+<img src="{% static "images/angrybat.jpg" %}" alt="Not loaded" >
+</body>
+</html>

@@ -1,0 +1,144 @@
+{% extends "GEN/base.html" %}
+{% block body_block %}
+
+<input type="hidden" id="ul_user_status" value="{% url 'GEN:change_user_status' %}" />
+
+<div class="col-12  pl_20 pr_20">
+<!-- <div class="float-left col-md-12 no-padding"> -->
+  <div class="col-12 col-md-4 float-left pl_0">
+    <h1 class="header_title float-left mt_15 w-100">Users </h1>
+    <span class="font_14 float-left grey_color">120 reported cases</span>
+  </div>
+  <div class="col-md-8 float-right pr_0 mb_15">
+    <input type="email" class="form-control float-left col-md-8 mt_15" placeholder="Search here..">
+  </div>
+
+
+
+
+
+
+
+
+
+<div class="common_container  pt_0">
+  <div class="table-responsive">
+      <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>COVID19 Status</th>
+              <th>Symptons</th>
+              <th>Gender</th>
+              <th>Mobile</th>
+              <th>Whatsapp</th>
+              <th>Address</th>
+              <th>Pincode</th>
+              <th>City</th>
+<!-- AIzaSyCME_QQ7e3dFgkxewLrscix1UkccdVjjwo -->
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+              <tr>
+
+                <td onclick="getUserOrderDetails('{{user.user_meta.username }}')">{{ user.user_meta.fullname }}</td>
+                <td>{{ user.user_meta.c_status }}</td>
+                <td>{{ user.user_profile.symptom_total }} %</td>
+                <td>{{ user.user_profile.gender }}</td>
+                <td>{{ user.user_profile.phone_primary }}</td>
+                <td>{{ user.user_profile.phone_secondary }}</td>
+                <td>{{ user.user_profile.location_area }}, {{ user.user_profile.location_sublocality }} </td>
+                <td>{{ user.user_profile.location_pincode }}</td>
+                <td>{{ user.user_profile.location_city }}</td>
+
+
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+  </div>
+</div>
+
+{% if users.has_other_pages %}
+<div class="col-md-12 float-left pr_0">
+  <nav aria-label="Page navigation example">
+    <ul class="pagination">
+      {% if users.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page={{ users.previous_page_number }}">Previous</a></li>
+      {% else %}
+      <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+      {% endif %}
+      {% for i in users.paginator.page_range %}
+      {% if users.number == i %}
+      <li class="page-item active"><a class="page-link" href="#"><span>{{ i }}</span></a> </li>
+      {% else %}
+      <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+      {% endif %}
+      {% endfor %}
+      {% if users.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ users.next_page_number }}">Next </a></li>
+      {% else %}
+      <!-- <li class="disabled"><span>&raquo;</span></li> -->
+      <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+<!-- <li class="page-item active"><span>{{ i }} <span class="sr-only">(current)</span></span></li> -->
+{% endif %}
+
+</div>
+
+
+<div class="modal fade" id="user_order_view_alrt" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog model_register_boy" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="da_view_title">View Customer Order</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+          {% csrf_token %}
+
+
+          <div class="common_container pt_0" >
+
+           <table class="table" id="mytab1">
+             <thead>
+               <tr>
+                 <th>Order Id</th>
+                 <th>Order Items</th>
+                 <th>Craeted On</th>
+                 <th>Updated On</th>
+               </tr>
+             </thead>
+             <tbody id="item_table">
+
+             </tbody>
+
+          </table>
+
+
+
+          </div>
+
+
+        </div>
+
+      <div>
+      </div>
+
+      </div><!--BODY END HERE-->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary float-left" data-dismiss="modal">Close</button>
+
+      </div>
+    </div>
+  </div>
+<!-- da view ends  -->
+
+{% endblock %}

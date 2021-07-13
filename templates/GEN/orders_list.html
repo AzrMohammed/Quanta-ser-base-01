@@ -1,0 +1,280 @@
+{% extends "GEN/base.html" %}
+{% block body_block %}
+
+<div class="col-12  pl_20 pr_20">
+<div class="float-left col-md-12 no-padding">
+    <div class="col-12 col-md-4 float-left pl_0">
+    <h1 class="header_title float-left mt_15 w-100">Orders </h1>
+    <span class="font_14 float-left grey_color">Showing 120 order received</span>
+  </div>
+  <div class="col-md-8 col-12 float-right pr_0 mb_15">
+    <input type="email" id="search_input" class="form-control float-left col-md-8 mt_15" placeholder="Search here..">
+    <button type="button"  onclick="openDaOrderForm()" class="mt_15 btn primary_btn float-right">Create an Order</button>
+<input type="hidden" id="url_order_status" value="{% url 'GEN:change_order_status' %}" />
+<input type="hidden" id="url_user_suggestion" value="{% url 'GEN:get_user_details' %}" />
+<input type="hidden" id="url_product_list_suggestion" value="{% url 'GEN:product_list_suggestion' %}" />
+
+    <!-- <button type="hidden" onclick="getOrderDetails()" class="mt_15 btn primary_btn float-left">Get Details</button> -->
+    <!-- getOrderDetails -->
+  </div>
+
+<div class="common_container pt_0">
+  <div class="table-responsive">
+      <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Customer</th>
+              <th>Order Items</th>
+              <th>Delivery Location</th>
+              <th>Agent Name</th>
+              <th>Booked on</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders %}
+              <tr>
+
+                <td style="width:5%;">{{ order.order_meta.order_id }}</td>
+                <td style="width:8%;">{{ order.order_foreign.user_customer.user }}</td>
+                <td style="width:25%;">{{ order.order_meta.order_items }}</td>
+                <td style="width:17%;">{{ order.order_foreign.user_customer.user_location_display }}</td>
+                <!-- <td style="width:10%;">{{ order.order_foreign.user_delivery_agent }}</td> -->
+                <td style="width:10%;">{{ order.order_meta.created_at }}</td>
+                <td style="width:12%;">
+                  <select class="from-control" name="order_status" id="order_status" onchange="updateOrderStatus('{{ order.order_meta.order_id }}')">
+                    {% for key, value in order_status_list.items %}
+                        {% if value == order.order_meta.status %}
+                             <option value="{{key}}" selected='selected'>{{value}}</option>
+                        {% else %}
+                             <option value="{{key}}">{{value}}</option>
+                        {% endif %}
+                    {% endfor %}
+                  </select>
+                </td>
+                <td style="width:13%;">
+                  <input type="hidden" value="{{ order.order_meta.slug }}" />
+                  <button  onclick="getOrderDetails('{{ order.order_meta.order_id }}')" type="button" name="button" class="float-left"> Edit</button>
+                  <button  onclick="viewEachOrderDetail('{{ order.order_meta.order_id }}')" type="button" name="button" class="float-left"> View</button> </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+  </div>
+</div>
+
+
+
+{% if orders.has_other_pages %}
+
+  <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        {% if orders.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ users.previous_page_number }}">Previous</a></li>
+        {% else %}
+        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+        {% endif %}
+        {% for i in orders.paginator.page_range %}
+          {% if orders.number == i %}
+        <li class="page-item active"><a class="page-link" href="#"><span>{{ i }}</span></a> </li>
+        {% else %}
+        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+        {% endif %}
+        {% endfor %}
+        {% if orders.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ users.next_page_number }}">Next </a></li>
+        {% else %}
+        <!-- <li class="disabled"><span>&raquo;</span></li> -->
+        <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+</div>
+
+{% endif %}
+
+
+
+<!-- order create alert -->
+
+<div class="modal fade" id="create_order_form_parent" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog model_create_order" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Create an Order</h5>
+
+          <button type="button" class="close" onclick="resetFrom('create_order_form')"data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+          <form action="/order_create/" method="POST" name="create_order_form" id="create_order_form">
+            {% csrf_token %}
+            <div class="col-md-5 float-left no-padding col-12">
+                <h1 class="primary_title float-left mb_10 w-100">Primary Information</h1>
+                <input type="hidden" class="form-control" name="pk" id="pk"  placeholder="Order Id" >
+
+              <div class="form-group col-md-6 pl_0 float-left">
+                <label for="exampleInputEmail1">Customer Name</label>
+                <input type="text" class="form-control" name="username" id="username"  placeholder="Full Name" >
+              </div>
+              <div class="form-group col-md-6 pl_0 float-left">
+                <label for="exampleInputEmail1">Phone Number</label>
+                <!-- <input type="text" onchange="myFunction()"  id="phonea" name="phonea" placeholder="Enter phone number"> -->
+                <!-- <li class="nav-item dropdown select_dropdown">
+                    <input type="text" onchange="myFunction()" class="select_dropdown_a form-control nav-link dropdown-toggle" href="#"   id="phone" name="phone" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" placeholder="Enter phone number">
+                    <p id="demo"></p>
+                    <div class="dropdown-menu dropdown_menu" aria-labelledby="phone">
+                    <a class="dropdown-item"> Apple Watch - <br> Price: Rs. 3,000 [Stock in Hand: 34 ] </a>
+                    <a class="dropdown-item"> Smart Watch - <br> Price: Rs. 3,000 [Stock in Hand: 34 ] </a>
+                    <div class="dropdown-divider"></div> <a class="dropdown-item" href="">+ Add New Items</a>
+                   </div>
+                </li> -->
+                <input type="number" onchange="get_user_suggestion()" max_length="10" class="form-control" name="phone_primary" id="phone_primary"  placeholder="10 digit number">
+              </div>
+              <div class="form-group col-md-6 pl_0 float-left">
+                <label for="exampleInputEmail1">Delivery Locality</label>
+                <input type="text" class="form-control" name="location_area" id="location_area"  placeholder="Delivery Locality">
+              </div>
+              <div class="form-group col-md-6 pl_0 float-left">
+                <label for="exampleInputEmail1">Street Name </label>
+                <input type="text" class="form-control" name="location_sublocality" id="location_sublocality"  placeholder="Flat / House no / Floor">
+              </div>
+              <div class="form-group col-md-6 pl_0 float-left">
+                <label for="exampleInputEmail1">Landmark (optional) </label>
+                <input type="text" class="form-control" name="location_locality" id="location_locality" placeholder="eg: Near Apollo Pharmacy">
+              </div>
+              <div class="form-group col-md-6 pl_0 float-left">
+                <label for="exampleInputEmail1">City</label>
+                <input type="text" class="form-control" name="location_city" id="location_city"  placeholder="City">
+              </div>
+              <div class="form-group col-md-6 pl_0 float-left">
+                <label for="exampleInputEmail1">Pincode</label>
+                <input type="number" max_length="6" class="form-control" name="location_pincode" id="location_pincode"  placeholder="Pincode">
+              </div>
+              <!-- <div class="form-group col-md-6 pl_0 float-left">
+                <label for="exampleInputEmail1">State</label>
+                <select class="form-control" id="location_state" name="location_state">
+                  {% for key, value in state_list.items %}
+                  <option value="{{key}}"> {{value}} </option>
+                  {% endfor %}
+                </select>
+              </div> -->
+
+              <span id="error_el" class="error_msg_box"></span>
+              <span id="success_el" class="success_msg_box"></span>
+            </div>
+            <!--END of USER form Data-->
+            <!-- product list alert -->
+            <div class="col-md-7 float-left pr_0 col-12" style="">
+                <h1 class="primary_title float-left mb_10">Product Requirment</h1>
+                  <button type="button" onclick="getOrderItemComponent()" class="add_more float-right">+ Add More Items</button>
+              <!-- <div id="order_item_list_parent" > -->
+                <ul id="ole" class="product_list">
+                  <li>
+                    <div class="product_list">
+                    <div class="form-group col-md-4  pl_0 float-left">
+                    <label for="exampleInputEmail1">1. Items name / product name </label>
+                    <!-- <input type="text" class="form-control" id="item_name" name="item_name_1" placeholder="Write down the requirment"> -->
+                    <div class="nav-item dropdown select_dropdown">
+                        <input type="text" id="product_sugg" onchange="get_product_list_suggestion()" class="select_dropdown_a form-control nav-link dropdown-toggle" href="#"  name="product_sugg" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" placeholder="Product Name">
+                        <p id="demo"></p>
+                        <div class="dropdown-menu dropdown_menu" id= "product_li" aria-labelledby="phone">
+                        <!-- <a class="dropdown-item"> Apple Watch - <br> Price: Rs. 3,000 [Stock in Hand: 34 ] </a>
+                        <a class="dropdown-item"> Smart Watch - <br> Price: Rs. 3,000 [Stock in Hand: 34 ] </a> -->
+                        <div class="dropdown-divider"></div> <a class="dropdown-item" href="">+ Add New Items</a>
+                       </div>
+                    </div>
+
+
+                    </div>
+                    <div class="form-group col-md-2 pl_0 float-left">
+                    <label for="exampleInputEmail1">Quantity</label>
+                    <input type="number" value="1" class="form-control" id="item_quantity" name="item_quantity_1" placeholder="Quantity">
+                    </div>
+                    <div class="form-group col-md-2 pl_0 float-left">
+                    <label for="">UNIT</label>
+                    <select class="form-control" id="measurement_unit" name="measurement_unit_1">
+                    {% for measurements in measurements_list %}
+                    <option value="{{measurements.name}}"> {{measurements.name}} </option>
+                    {% endfor %}
+                    </select>
+                    </div>
+                    <div class="from-group col-md-4 pl_0 float-left">
+                      <label for=""></label>
+                      <button type="button" id="btn_add_product" onclick="AddProduct()" class="btn primary_btn float-right">Add Product</button>
+                    </div>
+                    </div>
+                    <input type="hidden" class="form-control" name="item_pk_1" id="item_pk"  placeholder="Order Item Id" >
+
+                  </li>
+                  <li><hr></li>
+                </ul>
+              <!-- </div> -->
+                <h1 class="primary_title float-left mb_10">Added Items</h1>
+                <ul id="ole" class="product_list">
+                  <li>
+                    <div class="product_list">
+                    <div class="form-group col-md-4  pl_0 float-left">
+                    <label for="exampleInputEmail1">Items name  </label>
+                    <!-- <span type="text" class="form-control" id="item_name" name="item_name_1" placeholder="Write down the requirment">Product a</span> -->
+                    <!-- <span class="font_14 float-left grey_color">Showing 120 order received</span> -->
+                    </div>
+                    <div class="form-group col-md-2 pl_0 float-left">
+                    <label for="exampleInputEmail1">Quantity</label>
+
+                    </div>
+                    <div class="form-group col-md-2 pl_0 float-left">
+                    <label for="">UNIT</label>
+
+                  </li>
+                </ul>
+              <div id="order_item_list_parent" >
+
+                <ul id="ole" class="product_list">
+                  <li>
+                    <div class="product_list">
+                    <div class="form-group col-md-4 mt-3  pl_0 float-left">
+                    <span class="font_14 float-left ">Product A</span>
+                    </div>
+                    <div class="form-group col-md-2 pl_1 mt-3 float-left">
+                      <span class="font_14 float-left ">5</span>
+                    </div>
+                    <div class="form-group col-md-2 pl_1 mt-3 float-left">
+                      <span class="font_14 float-left ">kg</span>
+
+                      </div>
+                      <div class="from-group col-md-0 mt-0 mt-1 pl_0 float-left">
+
+                        <button type="button" id="btn_add_product" onclick="AddProduct()" class="btn primary_btn float-right">Remove item</button>
+                      </div>
+                  </li>
+
+                </ul>
+              </div>
+
+            </div>
+            <!-- ======== End of product list alert -->
+
+
+
+
+          </form>
+        </div>
+        <!--BODY END HERE-->
+        <div class="modal-footer">
+          <button type="button" onclick="resetFrom('create_order_form')" class="btn btn-secondary float-left" data-dismiss="modal">Close</button>
+          <button type="button" id="btn_submit" onclick="createOrder()" class="btn primary_btn float-right">Place Order</button>
+          <!-- <button type="button" onclick="createOrder()" class="btn primary_btn float-right">Place Order</button> -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock %}

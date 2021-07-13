@@ -1,0 +1,386 @@
+  {% extends "GEN/base.html" %}
+{% block body_block %}
+<input type="hidden" id="ul_user_status" value="{% url 'GEN:change_user_status' %}" />
+<div class="float-left col-md-12 no-padding">
+
+  <input type="hidden" id="da_fetch" value="{% url 'GEN:get_da_details' %}" />
+
+
+  <input type="hidden" id="pic_server_prefix" value="{{ pic_server_prefix }}" />
+  <div class="col-12 col-md-4 float-left pl_0">
+    <h1 class="header_title float-left mt_15 mb_15">Customer care executives</h1>
+  </div>
+  <div class="col-md-8 float-right pr_0 mb_15">
+    <input type="email" class="form-control float-left col-md-8 mt_15" placeholder="Search here..">
+    <button type="button"  onclick="openDaRegisterCustomerCareForm()" class="mt_15 btn primary_btn float-right">Register a Boy</button>
+
+
+  </div>
+
+  <div class="common_container pt_0">
+    {% load static %}
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Employee ID</th>
+            <th>Customer Care Boy</th>
+            <th>Area</th>
+            <th>Locality</th>
+            <th>Phone Number</th>
+            <th>Status</th>
+            <th>Actions</th>
+
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+            <tr>
+
+              <td>
+                {% if user.user_profile.profile_pic %}
+                <img width="30" height="30" src="{{ user.user_profile.profile_pic.url }}" alt="avatar" class="profile-pic">
+                {% endif %}
+              </td>
+
+              <td>{{ user.user_profile.ref_id }}</td>
+              <td>{{ user.user_meta.username }}</td>
+              <td>{{ user.user_profile.location_area }}</td>
+              <td>{{ user.user_profile.location_sublocality }}</td>
+              <td>{{ user.user_profile.phone_primary }}</td>
+              <!-- <td>{{ user.user_profile.user_status }}</td> -->
+              <td>
+                {% if user.user_profile.user_status == "AT" %}
+
+                <label class="switch">
+                <input type="checkbox" checked onclick="deActivateUser('{{ user.user_meta.username }}')" >
+                <span class="slider"></span>
+                </label>
+
+                {% else %}
+
+                <label class="switch">
+                <input type="checkbox"  onclick="activateUser('{{ user.user_meta.username }}')" >
+                <span class="slider"></span>
+                </label>
+
+                {% endif %}
+
+              </td>
+              <td><input type="hidden" value="{{ user.user_meta.username }}" /> <button  onclick="proceedEdit('{{ user.user_meta.username }}')" type="button" name="button"> Edit</button> <button  onclick="proceedView('{{ user.user_meta.username }}')" type="button" name="button"> View</button> </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+{% if users.has_other_pages %}
+<div class="col-md-12 float-left pr_0">
+  <nav aria-label="Page navigation example">
+    <ul class="pagination">
+      {% if users.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page={{ users.previous_page_number }}">Previous</a></li>
+      {% else %}
+      <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+      {% endif %}
+      {% for i in users.paginator.page_range %}
+      {% if users.number == i %}
+      <li class="page-item active"><a class="page-link" href="#"><span>{{ i }}</span></a> </li>
+      {% else %}
+      <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+      {% endif %}
+      {% endfor %}
+      {% if users.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ users.next_page_number }}">Next </a></li>
+      {% else %}
+      <!-- <li class="disabled"><span>&raquo;</span></li> -->
+      <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+<!-- <li class="page-item active"><span>{{ i }} <span class="sr-only">(current)</span></span></li> -->
+
+{% endif %}
+
+</div>
+
+<!-- registration dialog starts -->
+
+
+
+
+<!-- da view -->
+
+<div class="modal fade" id="registerBoy" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog model_register_boy" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Register a  Customer Care</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <h1 class="primary_title float-left mb_10 w-100">Primary Information  / ಪ್ರಾಥಮಿಕ ಮಾಹಿತಿ </h1>
+        <form   action="/register_customer_care/" method="POST" name="register_agent_form" id="register_agent_form">
+          {% csrf_token %}
+
+          <input type="hidden" class="form-control" name="pk" id="pk"  placeholder="User Name" >
+          <input type="hidden" class="form-control" name="header_type" id="header_type"  value="1" >
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">User Name</label>
+            <input type="text" class="form-control" name="username" id="username"  placeholder="User Name" >
+          </div>
+
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Password</label>
+            <input type="password" max_length="12" class="form-control" name="password" id="password"  placeholder="Password">
+          </div>
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Full name</label>
+            <input type="text" class="form-control" name="first_name" id="first_name"  placeholder="Full Name" >
+          </div>
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Email</label>
+            <input type="text" name="email" class="form-control" id="email"  placeholder="Email">
+          </div>
+
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Primary Phone Number</label>
+            <input type="number" max_length="10" class="form-control" name="phone_primary" id="phone_primary"  placeholder="Primary Phone Number">
+          </div>
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Secondary Phone Number</label>
+            <input type="number" max_length="10" class="form-control" name="phone_secondary" id="phone_secondary"  placeholder="Secondary Phone Number">
+          </div>
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Delivery Area (Locality) </label>
+            <input type="text" class="form-control" name="location_area" id="location_area"  placeholder="Delivery Area">
+          </div>
+          <div class="col-md-12 no-padding float-left">
+            <h1 class="primary_title float-left mb_10 w-100">Permanent Address / ಶಾಶ್ವತ ವಿಳಾಸ</h1>
+            <div class="form-group col-md-3 pl_0 float-left">
+              <label for="exampleInputEmail1">Address</label>
+              <input type="text" class="form-control" name="location_sublocality" id="location_sublocality"  placeholder="Address">
+            </div>
+
+            <div class="form-group col-md-3 pl_0 float-left">
+              <label for="exampleInputEmail1">Street / Landmark </label>
+              <input type="text" class="form-control" name="location_locality" id="location_locality" placeholder="Street / Landmark">
+            </div>
+
+            <div class="form-group col-md-3 pl_0 float-left">
+              <label for="exampleInputEmail1">City</label>
+              <input type="text" class="form-control" name="location_city" id="location_city"  placeholder="City">
+            </div>
+
+            <div class="form-group col-md-3 pl_0 float-left">
+              <label for="exampleInputEmail1">Pincode</label>
+              <input type="number" max_length="6" class="form-control" name="location_pincode" id="location_pincode"  placeholder="Pincode">
+            </div>
+
+            <div class="form-group col-md-3 pl_0 float-left">
+              <label for="exampleInputEmail1">State</label>
+              <select class="form-control" id="location_state" name="location_state">
+                {% for key, value in state_list.items %}
+                <option value="{{key}}"> {{value}} </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Profile pic</label>
+              <img width="40" height="40" src="" alt="avatar" class="profile-pic" name="profile_pic_v" id="profile_pic_v" />
+            <input type="file" class="form-control" name="profile_pic" id="profile_pic" placeholder="profile_pic">
+
+          </div>
+
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Driving Licence</label>
+              <img width="40" height="40" src="" alt="avatar" class="profile-pic" name="driving_liscence_pic_v" id="driving_liscence_pic_v" />
+            <input type="file" class="form-control" name="driving_liscence_pic" id="driving_liscence_pic" placeholder="Driving Licence">
+
+          </div>
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Adhar Card</label>
+              <img width="40" height="40" src="" alt="avatar" class="profile-pic" name="pan_card_pic_v" id="pan_card_pic_v" />
+            <input type="file" class="form-control" name="pan_card_pic" id="pan_card_pic" placeholder="Adhar Card">
+          </div>
+
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Rc</label>
+            <input type="file" class="form-control" name="rc_pic" id="rc_pic" placeholder="Rc">
+          </div>
+          <span id="error_el" class="error_msg_box"></span>
+              <span id="success_el" class="success_msg_box"></span>
+
+          <!-- <h1 id="error_el" class="header_title float-left mb_20 w-100"></h1>
+
+          <h1 id="success_el" class="header_title float-left mb_20 w-100"></h1> -->
+        </form>
+
+
+
+      <div>
+      </div>
+
+      </div><!--BODY END HERE-->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary float-left" data-dismiss="modal">Close</button>
+        <button type="button" id="btn_add_agent" onclick="registerAgent()" class="btn primary_btn float-right">Add Agent</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="registerBoyView" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog model_register_boy" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="da_view_title">Customer Care </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+          {% csrf_token %}
+
+
+          <input type="hidden" class="form-control" name="pk" id="pk_v"  placeholder="User Name" >
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">User Name</label>
+            <span class="font_14 float-left" id="username_v" > </span>
+          </div>
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Full name</label>
+            <span class="font_14 float-left" id="first_name_v" > </span>
+          </div>
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Email</label>
+            <span class="font_14 float-left" id="email_v" > </span>
+
+          </div>
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Primary Phone Number</label>
+            <span class="font_14 float-left" id="phone_primary_v" > </span>
+
+          </div>
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Secondary Phone Number</label>
+            <span class="font_14 float-left" id="phone_secondary_v" > </span>
+
+          </div>
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Area</label>
+            <span class="font_14 float-left" id="location_area_v" > </span>
+
+          </div>
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Address</label>
+            <span class="font_14 float-left" id="location_sublocality_v" > </span>
+
+          </div>
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Street / Landmark</label>
+            <span class="font_14 float-left" id="location_locality_v" > </span>
+
+          </div>
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">City</label>
+            <span class="font_14 float-left" id="location_city_v" > </span>
+
+          </div>
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Pincode</label>
+            <span class="font_14 float-left" id="location_pincode_v" > </span>
+
+          </div>
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">State</label>
+            <span class="font_14 float-left" id="location_state_v" > </span>
+          </div>
+          <div class="w-100 float-left">
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Profile pic</label>
+            <div class="proff_model image_aspect_container">
+              <img class="profile-pic image_aspect_img" name="profile_pic" id="profile_pic_v_v" />
+            </div>
+
+          </div>
+
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Driving Licence</label>
+            <div class="proff_model image_aspect_container">
+              <img class="profile-pic image_aspect_img" name="driving_liscence_pic" id="driving_liscence_pic_v_v" />
+            </div>
+
+          </div>
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Adhar Card</label>
+            <div class="proff_model image_aspect_container">
+              <img class="profile-pic image_aspect_img" name="pan_card_pic" id="pan_card_pic_v_v" />
+            </div>
+
+          </div>
+
+
+          <div class="form-group col-md-3 pl_0 float-left">
+            <label for="exampleInputEmail1">Rc</label>
+            <div class="proff_model image_aspect_container">
+              <img class="profile-pic image_aspect_img" name="rc_pic" id="rc_pic_v_v"/>
+            </div>
+
+
+          </div>
+        </div>
+
+      <div>
+      </div>
+
+      </div><!--BODY END HERE-->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary float-left" data-dismiss="modal">Close</button>
+
+      </div>
+    </div>
+  </div>
+</div>
+<!-- da view ends  -->
+
+{% endblock %}
+
+
+
+
+<!-- ======================
+  =======================================
+  POPUP MODAl CREATE a DELIVERy BOY============================ -->
+<!-- Modal -->
