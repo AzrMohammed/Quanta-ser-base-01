@@ -34,7 +34,7 @@ MEDIA_URL = '/media/'
 SECRET_KEY = '(vmbp7%!xguw1m^z)z9vn4^68u4x&st!0%w3o=u54%wc&ec!d9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 
 # STATIC_ROOT = "app-root/repo/wsgi/static"
@@ -46,7 +46,8 @@ DEBUG = False
 #
 #     )
 
-ALLOWED_HOSTS = ['quanta-dj-base.herokuapp.com','http://127.0.0.1']
+# ALLOWED_HOSTS = ['quanta-dj-base.herokuapp.com', '127.0.0.1', 'http://127.0.0.1']
+ALLOWED_HOSTS = ['*']
     # '206.189.129.128', '192.168.0.104','127.0.0.1','192.168.0.106','192.168.0.100', '192.168.43.69']
 
 
